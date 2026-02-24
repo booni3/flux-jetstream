@@ -1,0 +1,27 @@
+{
+    "name": "profilestudio/flux-jetstream",
+    "description": "Flux UI v2 replacements for Jetstream's published Blade views",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["laravel", "jetstream", "flux", "livewire", "blade"],
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^11.0|^12.0",
+        "laravel/jetstream": "^5.0",
+        "livewire/flux": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "ProfileStudio\\FluxJetstream\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "ProfileStudio\\FluxJetstream\\FluxJetstreamServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
