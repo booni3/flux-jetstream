@@ -1,6 +1,6 @@
 <?php
 
-namespace ProfileStudio\FluxJetstream;
+namespace Booni3\FluxJetstream;
 
 use Illuminate\Support\ServiceProvider;
 

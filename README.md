@@ -75,7 +75,7 @@ Jetstream's Livewire components call views without a namespace (e.g. `view('prof
 ### 1. Require the package
 
 ```bash
-composer require profilestudio/flux-jetstream
+composer require booni3/flux-jetstream
 ```
 
 The service provider is auto-discovered — no manual registration needed.

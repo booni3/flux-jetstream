@@ -1,5 +1,5 @@
 {
-    "name": "profilestudio/flux-jetstream",
+    "name": "booni3/flux-jetstream",
     "description": "Flux UI v2 replacements for Jetstream's published Blade views",
     "type": "library",
     "license": "MIT",
@@ -12,13 +12,13 @@
     },
     "autoload": {
         "psr-4": {
-            "ProfileStudio\\FluxJetstream\\": "src/"
+            "Booni3\\FluxJetstream\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "ProfileStudio\\FluxJetstream\\FluxJetstreamServiceProvider"
+                "Booni3\\FluxJetstream\\FluxJetstreamServiceProvider"
             ]
         }
     },
