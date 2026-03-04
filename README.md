@@ -79,18 +79,31 @@ The service provider is auto-discovered — no manual registration needed.
 php artisan vendor:publish --tag=flux-jetstream-config
 ```
 
-Edit `config/flux-jetstream.php` to set your brand name and logo:
+Edit `config/flux-jetstream.php`:
 
 ```php
 return [
     'brand' => [
         'name' => 'My App',
-        'logo' => '/img/logo.png',      // path to logo image
-        'logo_dark' => null,             // optional dark mode variant
+        'logo' => '/img/logo.png',       // sidebar logo image
+        'logo_dark' => '/img/logo-w.png',// used on colored background (inverted automatically)
+        'auth_logo' => '/img/logo.png',  // auth pages — image path or component name (e.g. 'mylogo')
         'url' => '/',                    // logo link target
+        'color' => 'bg-cyan-400',        // colored background behind sidebar logo (null = use flux:brand)
     ],
+
+    'sidebar' => [
+        'style' => 'dark',              // 'dark' or 'light'
+        'bg' => '#1E2938',              // sidebar background color (dark style only)
+        'border' => null,               // border class override (null = default per style)
+        'collapsed_default' => true,    // start collapsed on first visit
+    ],
+
+    'body_bg' => '#F3F4F6',            // main content area background (null = white)
 ];
 ```
+
+See [Configuration Reference](#configuration-reference) below for full details.
 
 ### 3. Create required app views
 
@@ -116,15 +129,21 @@ Included in both the guest and authenticated layout's `<head>`:
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 ```
 
-#### Application logo — `resources/views/components/application-logo.blade.php`
+#### Application logo
 
-Displayed on auth pages (login, register, etc.). Receives a `class` attribute for sizing:
+The package includes a config-driven `application-logo` component. Set `brand.auth_logo` in your config:
 
-```blade
-<svg {{ $attributes }} viewBox="0 0 100 100">
-    <!-- your logo SVG -->
-</svg>
-```
+- **Image path** (starts with `/` or `http`) — renders as `<img>`:
+  ```php
+  'auth_logo' => '/img/logo.png',
+  ```
+- **Component name** — renders via `<x-dynamic-component>`:
+  ```php
+  'auth_logo' => 'mylogo',  // renders <x-mylogo />
+  ```
+- **`null`** (default) — renders the default Laravel Jetstream SVG.
+
+To fully replace the logo with a custom Blade component, create `resources/views/components/application-logo.blade.php` in your app — it will override the package's version automatically.
 
 ### 4. Optional app views
 
@@ -209,13 +228,16 @@ rm -f resources/views/components/responsive-nav-link.blade.php
 rm -f resources/views/components/banner.blade.php
 ```
 
-### 6. Add Tailwind content source
+### 6. Add Tailwind source and import package CSS
 
-Tailwind v4 does not scan `vendor/` by default. Add a `@source` directive to your `resources/css/app.css`:
+Tailwind v4 does not scan `vendor/` by default. Add these to your `resources/css/app.css`:
 
 ```css
 @source "../../vendor/booni3/flux-jetstream/resources/views";
+@import '../../vendor/booni3/flux-jetstream/resources/css/flux-jetstream.css';
 ```
+
+The `@source` directive ensures Tailwind scans the package views for class names. The `@import` loads the dark sidebar styles (only applies when `sidebar.style` is set to `'dark'`).
 
 Then rebuild your assets:
 
@@ -233,7 +255,7 @@ php artisan view:clear
 
 | File | Required | Description |
 |---|---|---|
-| `components/application-logo.blade.php` | Yes | Logo for auth pages |
+| `components/application-logo.blade.php` | No | Override if `brand.auth_logo` config isn't sufficient |
 | `components/favicon.blade.php` | Yes | Favicon `<link>` tags |
 | `sidebar-navigation.blade.php` | Yes | `<flux:navlist.item>` entries |
 | `app/View/Components/GuestLayout.php` | Yes | Already exists from Jetstream install |
@@ -251,6 +273,75 @@ resources/views/auth/login.blade.php
 Your app's version takes precedence automatically — no configuration needed.
 
 To override the authenticated layout, create `resources/views/components/layouts/app.blade.php` — this will take precedence over the package's sidebar layout.
+
+## Configuration Reference
+
+### `brand`
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `name` | string | `APP_NAME` | App name shown in sidebar and page titles |
+| `logo` | string\|null | `null` | Sidebar logo image path (e.g. `'/img/logo.png'`) |
+| `logo_dark` | string\|null | `null` | Logo variant for colored backgrounds — automatically gets `brightness-0 invert` applied |
+| `auth_logo` | string\|null | `null` | Auth page logo — image path (`'/img/logo.png'`), component name (`'mylogo'`), or `null` for default SVG |
+| `url` | string | `'/'` | Logo link target |
+| `color` | string\|null | `null` | Tailwind class for colored logo background (e.g. `'bg-cyan-400'`). When set, logo renders inside a colored rounded square. When `null`, uses Flux's `<flux:brand>` component instead |
+
+### `sidebar`
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `style` | string | `'light'` | `'dark'` or `'light'` — dark adds the `dark` class and `fj-sidebar-dark` for styling |
+| `bg` | string\|null | `'#1E2938'` | Sidebar background color (dark style only, set via CSS custom property) |
+| `border` | string\|null | `null` | Border class override (e.g. `'border-r border-gray-900'`). `null` uses sensible defaults per style |
+| `collapsed_default` | bool | `true` | Whether the sidebar starts collapsed on first visit (sets localStorage) |
+
+### `body_bg`
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `body_bg` | string\|null | `null` | Main content area background color (e.g. `'#F3F4F6'`). `null` = white |
+
+## Sidebar Styling
+
+### Dark sidebar
+
+Set `sidebar.style` to `'dark'` to enable the dark sidebar theme. The package CSS (`flux-jetstream.css`) applies styles via the `.fj-sidebar-dark` class:
+
+- Dark background with configurable color
+- Gray icons (`--color-gray-400`) that turn white on hover
+- Active items highlighted with `--color-gray-900` background
+- Square icon buttons when collapsed (aspect-ratio 1:1)
+- Consistent padding between expanded and collapsed states
+
+### CSS custom properties
+
+Override any of these in your own CSS to fine-tune the dark sidebar appearance:
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--fj-sidebar-bg` | `#1E2938` | Sidebar background color |
+| `--fj-sidebar-border` | `--color-gray-900` | Sidebar border color |
+| `--fj-sidebar-item-color` | `--color-gray-400` | Default item text/icon color |
+| `--fj-sidebar-item-hover-color` | `--color-white` | Item text color on hover |
+| `--fj-sidebar-item-hover-bg` | `--color-gray-700` | Item background on hover |
+| `--fj-sidebar-item-active-color` | `--color-white` | Active item text color |
+| `--fj-sidebar-item-active-bg` | `--color-gray-900` | Active item background |
+| `--fj-sidebar-icon-size` | `1.375rem` | Icon width and height |
+
+Example override in your `app.css`:
+
+```css
+:root {
+    --fj-sidebar-bg: #111827;
+    --fj-sidebar-item-active-bg: #1f2937;
+    --fj-sidebar-icon-size: 1.5rem;
+}
+```
+
+### Light sidebar
+
+The default `'light'` style uses Flux's built-in sidebar styling with a `bg-zinc-50` background. No additional CSS is applied.
 
 ## Component Mapping
 
