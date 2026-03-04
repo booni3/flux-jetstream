@@ -52,3 +52,8 @@
     aspect-ratio: 1 / 1;
     justify-content: center;
 }
+
+/* ── Collapsed state: prevent profile chevron overflow ────────────── */
+[data-flux-sidebar-collapsed-desktop] {
+    overflow-x: hidden;
+}
