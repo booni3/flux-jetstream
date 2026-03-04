@@ -1,0 +1,54 @@
+/*
+ * Flux Jetstream — Sidebar Styles
+ *
+ * Import this file in your app.css:
+ *   @import '../../vendor/booni3/flux-jetstream/resources/css/flux-jetstream.css';
+ *
+ * All colours are configurable via CSS custom properties set by the
+ * layout from config/flux-jetstream.php. Override any property in your
+ * own CSS if needed.
+ */
+
+/* ── Dark sidebar base ─────────────────────────────────────────────── */
+[data-flux-sidebar].fj-sidebar-dark {
+    background-color: var(--fj-sidebar-bg, #1E2938);
+    border-color: var(--fj-sidebar-border, var(--color-gray-900));
+    gap: 0.5rem;
+    padding: 0.5rem;
+}
+
+/* ── Item spacing & alignment ──────────────────────────────────────── */
+[data-flux-sidebar].fj-sidebar-dark [data-flux-sidebar-item] {
+    margin-block: 0;
+    padding-inline: calc(0.625rem - 1px);
+    color: var(--fj-sidebar-item-color, var(--color-gray-400));
+}
+
+[data-flux-sidebar].fj-sidebar-dark [data-flux-sidebar-item]:hover {
+    color: var(--fj-sidebar-item-hover-color, var(--color-white));
+    background-color: var(--fj-sidebar-item-hover-bg, var(--color-gray-700));
+}
+
+[data-flux-sidebar].fj-sidebar-dark [data-flux-sidebar-item][data-current] {
+    color: var(--fj-sidebar-item-active-color, var(--color-white));
+    background-color: var(--fj-sidebar-item-active-bg, var(--color-gray-900));
+    border-color: transparent;
+}
+
+[data-flux-sidebar].fj-sidebar-dark [data-flux-sidebar-item][data-current]:hover {
+    color: var(--fj-sidebar-item-active-color, var(--color-white));
+    background-color: var(--fj-sidebar-item-active-bg, var(--color-gray-900));
+}
+
+/* ── Icon sizing ───────────────────────────────────────────────────── */
+[data-flux-sidebar].fj-sidebar-dark [data-flux-sidebar-item] svg {
+    width: var(--fj-sidebar-icon-size, 1.375rem);
+    height: var(--fj-sidebar-icon-size, 1.375rem);
+}
+
+/* ── Collapsed state: square items ─────────────────────────────────── */
+[data-flux-sidebar-collapsed-desktop].fj-sidebar-dark [data-flux-sidebar-item] {
+    height: auto;
+    aspect-ratio: 1 / 1;
+    justify-content: center;
+}

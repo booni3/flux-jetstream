@@ -1,6 +1,6 @@
 # Flux Jetstream
 
-Drop-in [Flux UI v2](https://fluxui.dev) replacements for all of [Laravel Jetstream](https://jetstream.laravel.com)'s published Blade views (Livewire stack).
+Drop-in [Flux UI v2](https://fluxui.dev) replacements for all of [Laravel Jetstream](https://jetstream.laravel.com)'s published Blade views (Livewire stack), plus an optional Flux sidebar layout.
 
 Replaces Jetstream's default Blade components (`<x-input>`, `<x-button>`, `<x-form-section>`, `<x-dialog-modal>`, etc.) with their Flux UI equivalents (`<flux:input>`, `<flux:button>`, `<flux:card>`, `<flux:modal>`, etc.).
 
@@ -25,7 +25,7 @@ Replaces Jetstream's default Blade components (`<x-input>`, `<x-button>`, `<x-fo
 | `auth/verify-email.blade.php` | Email verification notice |
 | `auth/two-factor-challenge.blade.php` | 2FA with `<flux:otp>` and recovery code fallback |
 
-### Settings panels (wrapped in your app's authenticated layout)
+### Settings panels (wrapped in the authenticated layout)
 
 | View | Description |
 |---|---|
@@ -48,18 +48,11 @@ Replaces Jetstream's default Blade components (`<x-input>`, `<x-button>`, `<x-fo
 
 | View | Description |
 |---|---|
+| `components/layouts/app.blade.php` | Flux sidebar layout with stashable sidebar, profile dropdown, team switching, and mobile header |
 | `layouts/guest.blade.php` | Minimal HTML shell for auth pages (loads Vite, Livewire, Flux) |
 | `components/confirms-password.blade.php` | Password confirmation modal using Flux (same external API as Jetstream's) |
 | `terms.blade.php` | Terms of service page |
 | `policy.blade.php` | Privacy policy page |
-
-### What the package does NOT provide
-
-- **Your authenticated layout** (`components/layouts/app.blade.php`) — the settings pages reference `<x-layouts.app>` as their wrapper, but each app provides its own sidebar/topbar/navigation layout.
-- **Your application logo** (`<x-application-logo>`) — each app provides its own branding component.
-- **Your favicon** (`<x-favicon>`) — each app provides its own favicon links.
-- **The `GuestLayout` class component** — each app keeps this at `app/View/Components/GuestLayout.php` (already exists from Jetstream install).
-- **Your dashboard or any other app-specific pages.**
 
 ## How It Works
 
@@ -80,7 +73,80 @@ composer require booni3/flux-jetstream
 
 The service provider is auto-discovered — no manual registration needed.
 
-### 2. Delete Jetstream's published views
+### 2. Publish the config
+
+```bash
+php artisan vendor:publish --tag=flux-jetstream-config
+```
+
+Edit `config/flux-jetstream.php` to set your brand name and logo:
+
+```php
+return [
+    'brand' => [
+        'name' => 'My App',
+        'logo' => '/img/logo.png',      // path to logo image
+        'logo_dark' => null,             // optional dark mode variant
+        'url' => '/',                    // logo link target
+    ],
+];
+```
+
+### 3. Create required app views
+
+#### Sidebar navigation — `resources/views/sidebar-navigation.blade.php`
+
+The authenticated layout includes this view inside a `<flux:navlist>`. Add your navigation items:
+
+```blade
+<flux:navlist.item icon="home" href="/" :current="request()->routeIs('dashboard')">
+    Dashboard
+</flux:navlist.item>
+<flux:navlist.item icon="inbox" href="/orders" :current="request()->routeIs('orders.*')">
+    Orders
+</flux:navlist.item>
+```
+
+#### Favicon — `resources/views/components/favicon.blade.php`
+
+Included in both the guest and authenticated layout's `<head>`:
+
+```blade
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+```
+
+#### Application logo — `resources/views/components/application-logo.blade.php`
+
+Displayed on auth pages (login, register, etc.). Receives a `class` attribute for sizing:
+
+```blade
+<svg {{ $attributes }} viewBox="0 0 100 100">
+    <!-- your logo SVG -->
+</svg>
+```
+
+### 4. Optional app views
+
+#### Head partial — `resources/views/layouts/partials/head.blade.php`
+
+Extra `<head>` content (fonts, meta tags, etc.):
+
+```blade
+<link rel="preconnect" href="https://fonts.bunny.net">
+<link href="https://fonts.bunny.net/css?family=inter:400,500,600&display=swap" rel="stylesheet" />
+```
+
+#### Body-end partial — `resources/views/layouts/partials/body-end.blade.php`
+
+Scripts, modals, or other content before `</body>`:
+
+```blade
+@livewire('modal-pro')
+<script src="{{ asset('vendor/wire-elements-pro/js/overlay-component.js') }}"></script>
+```
+
+### 5. Delete Jetstream's published views
 
 Remove the views that the package now provides:
 
@@ -97,9 +163,11 @@ rm -rf resources/views/teams/
 # API views
 rm -rf resources/views/api/
 
-# Guest layout, confirms-password, terms, policy
-rm resources/views/layouts/guest.blade.php
-rm resources/views/components/confirms-password.blade.php
+# Layouts and components now provided by package
+rm -f resources/views/layouts/guest.blade.php
+rm -f resources/views/layouts/app.blade.php
+rm -f resources/views/components/layouts/app.blade.php
+rm -f resources/views/components/confirms-password.blade.php
 rm -f resources/views/terms.blade.php
 rm -f resources/views/policy.blade.php
 ```
@@ -107,7 +175,6 @@ rm -f resources/views/policy.blade.php
 Also delete the old Jetstream Blade components that Flux replaces:
 
 ```bash
-# Old Jetstream components (no longer needed)
 rm -f resources/views/components/button.blade.php
 rm -f resources/views/components/secondary-button.blade.php
 rm -f resources/views/components/danger-button.blade.php
@@ -126,84 +193,52 @@ rm -f resources/views/components/confirmation-modal.blade.php
 rm -f resources/views/components/authentication-card.blade.php
 rm -f resources/views/components/authentication-card-logo.blade.php
 rm -f resources/views/components/action-message.blade.php
-rm -f resources/views/components/banner.blade.php
 rm -f resources/views/components/welcome.blade.php
 ```
 
-And delete the dead `AppLayout` class (its view `layouts/app.blade.php` is the old Jetstream layout, not your sidebar layout):
+And delete the dead layout infrastructure:
 
 ```bash
 rm -f app/View/Components/AppLayout.php
+rm -f resources/views/navigation-menu.blade.php
+rm -f resources/views/components/switchable-team.blade.php
+rm -f resources/views/components/dropdown.blade.php
+rm -f resources/views/components/dropdown-link.blade.php
+rm -f resources/views/components/nav-link.blade.php
+rm -f resources/views/components/responsive-nav-link.blade.php
+rm -f resources/views/components/banner.blade.php
 ```
 
-### 3. Clear the view cache
+### 6. Add Tailwind content source
+
+Tailwind v4 does not scan `vendor/` by default. Add a `@source` directive to your `resources/css/app.css`:
+
+```css
+@source "../../vendor/booni3/flux-jetstream/resources/views";
+```
+
+Then rebuild your assets:
+
+```bash
+npm run build
+```
+
+### 7. Clear the view cache
 
 ```bash
 php artisan view:clear
 ```
 
-## What Your App Must Provide
+## What Your App Must Provide (Summary)
 
-The package views expect these components to exist in your app:
-
-### 1. Authenticated layout — `resources/views/components/layouts/app.blade.php`
-
-Your main application layout with navigation, topbar, user menu, etc. The settings pages wrap themselves in it like this:
-
-```blade
-<x-layouts.app>
-    <x-slot:title>Profile</x-slot:title>
-    <!-- settings content -->
-</x-layouts.app>
-```
-
-Your layout should render `{{ $title ?? '' }}` in the header area and `{{ $slot }}` for page content.
-
-### 2. Application logo — `resources/views/components/application-logo.blade.php`
-
-Displayed on auth pages (login, register, etc.) and terms/policy pages. Receives a `class` attribute for sizing:
-
-```blade
-{{-- Example: resources/views/components/application-logo.blade.php --}}
-<svg {{ $attributes }} viewBox="0 0 100 100">
-    <!-- your logo SVG -->
-</svg>
-```
-
-### 3. Favicon — `resources/views/components/favicon.blade.php`
-
-Included in the guest layout's `<head>`. Should output your favicon `<link>` tags:
-
-```blade
-{{-- Example: resources/views/components/favicon.blade.php --}}
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-```
-
-### 4. GuestLayout class — `app/View/Components/GuestLayout.php`
-
-This already exists from the standard Jetstream install. It maps `<x-guest-layout>` to `view('layouts.guest')` — the view file itself comes from this package:
-
-```php
-<?php
-
-namespace App\View\Components;
-
-use Illuminate\View\Component;
-use Illuminate\View\View;
-
-class GuestLayout extends Component
-{
-    public function render(): View
-    {
-        return view('layouts.guest');
-    }
-}
-```
-
-### 5. Vite entry points
-
-The guest layout calls `@vite(['resources/css/app.css', 'resources/js/app.js'])`. Ensure your Vite config builds these and that Tailwind/Flux styles are included.
+| File | Required | Description |
+|---|---|---|
+| `components/application-logo.blade.php` | Yes | Logo for auth pages |
+| `components/favicon.blade.php` | Yes | Favicon `<link>` tags |
+| `sidebar-navigation.blade.php` | Yes | `<flux:navlist.item>` entries |
+| `app/View/Components/GuestLayout.php` | Yes | Already exists from Jetstream install |
+| `layouts/partials/head.blade.php` | No | Extra `<head>` content |
+| `layouts/partials/body-end.blade.php` | No | Scripts/modals before `</body>` |
 
 ## Overriding Views
 
@@ -214,6 +249,8 @@ resources/views/auth/login.blade.php
 ```
 
 Your app's version takes precedence automatically — no configuration needed.
+
+To override the authenticated layout, create `resources/views/components/layouts/app.blade.php` — this will take precedence over the package's sidebar layout.
 
 ## Component Mapping
 
