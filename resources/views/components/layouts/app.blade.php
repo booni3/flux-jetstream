@@ -36,7 +36,7 @@
         @endif
     </script>
 </head>
-<body class="min-h-screen {{ $bodyBg ? 'bg-[' . $bodyBg . ']' : 'bg-white' }}">
+<body class="min-h-screen {{ $bodyBg ?: 'bg-white' }}">
 
     <flux:sidebar sticky collapsible
         @class([

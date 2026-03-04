@@ -17,5 +17,5 @@ return [
         'collapsed_default' => true, // start collapsed on first visit
     ],
 
-    'body_bg' => null,          // e.g. '#F3F4F6' — main content area background
+    'body_bg' => 'bg-gray-100', // Tailwind class for main content area background
 ];
