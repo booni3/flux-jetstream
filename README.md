@@ -251,6 +251,38 @@ npm run build
 php artisan view:clear
 ```
 
+## Custom Alpine Plugins
+
+The package layout uses `@fluxScripts` which loads Livewire, Alpine, and Flux's JavaScript (including Alpine plugins like `$persist`). If your app was previously bundling Livewire and Alpine manually in `app.js`, you **must** update your JavaScript setup to avoid conflicts.
+
+### The problem
+
+If your `app.js` imports Livewire/Alpine from the ESM dist:
+
+```js
+// This will BREAK — do not use alongside @fluxScripts
+import { Livewire, Alpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
+
+Alpine.plugin(MyPlugin)
+Livewire.start()
+```
+
+Alpine gets loaded twice (once from your bundle, once from `@fluxScripts`), causing a fatal `Cannot redefine property: $persist` error that silently breaks all Livewire interactivity.
+
+### The fix
+
+Remove the manual Livewire/Alpine import and `Livewire.start()` call. Register Alpine plugins via the `alpine:init` event instead — Alpine is available as `window.Alpine` at that point:
+
+```js
+import MyPlugin from 'my-alpine-plugin'
+
+document.addEventListener('alpine:init', () => {
+    window.Alpine.plugin(MyPlugin)
+})
+```
+
+`@fluxScripts` handles Livewire initialization automatically — no `Livewire.start()` needed.
+
 ## What Your App Must Provide (Summary)
 
 | File | Required | Description |
