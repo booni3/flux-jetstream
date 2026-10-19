@@ -251,6 +251,31 @@ npm run build
 php artisan view:clear
 ```
 
+## Design tokens
+
+`resources/css/theme.css` is the shared Tailwind v4 theme. Import it after Tailwind and Flux's CSS:
+
+```css
+@import 'tailwindcss';
+@import '../../vendor/livewire/flux/dist/flux.css';
+@import '../../vendor/booni3/flux-jetstream/resources/css/theme.css';
+```
+
+Do not define `@custom-variant dark` in the theme. Each app owns it and uses class-based dark mode (`.dark`).
+
+Tokens (each generates `bg-*`, `text-*`, `border-*` utilities):
+
+- `ground` (page background), `surface` (cards, tables, modals), `line` (borders), `muted` (secondary text)
+- `danger`, `warning`, `success`, `info`, `neutral`. Each has `<status>` (text), `<status>-soft` (background) and `<status>-line` (border)
+- `font-sans` is Nunito. The app loads the font itself.
+- The Flux accent (`--color-accent`, `--color-accent-content`, `--color-accent-foreground`) is zinc-800, and white in dark mode
+
+The tokens switch in `.dark` by overriding CSS variables, so Blade needs no `dark:` variant for them.
+
+Rule: Blade uses these utilities (`bg-surface`, `text-muted`, `border-line`, `text-danger`). Raw palette classes (`bg-red-500`, `text-zinc-400`) stay in `theme.css`.
+
+Per-app identity is the logo tile colour, `brand.color` in `config/flux-jetstream.php`. The shared sidebar colour is `sidebar.bg` (default `#1E2938`).
+
 ## Custom Alpine Plugins
 
 The package layout uses `@fluxScripts` which loads Livewire, Alpine, and Flux's JavaScript (including Alpine plugins like `$persist`). If your app was previously bundling Livewire and Alpine manually in `app.js`, you **must** update your JavaScript setup to avoid conflicts.
