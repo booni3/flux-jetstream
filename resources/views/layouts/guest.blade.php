@@ -15,7 +15,6 @@
 </head>
 <body class="font-sans text-zinc-900 antialiased">
     {{ $slot }}
-    @livewireScriptConfig
     @fluxScripts
     <flux:toast />
 </body>

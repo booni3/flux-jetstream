@@ -16,14 +16,15 @@
                 <flux:input label="{{ __('Confirm Password') }}" type="password" name="password_confirmation" required autocomplete="new-password" viewable />
 
                 @if (Laravel\Jetstream\Jetstream::hasTermsAndPrivacyPolicyFeature())
-                    <flux:checkbox name="terms" required>
-                        <flux:checkbox.label>
-                            {!! __('I agree to the :terms_of_service and :privacy_policy', [
-                                'terms_of_service' => '<flux:link href="'.route('terms.show').'" target="_blank">'.__('Terms of Service').'</flux:link>',
-                                'privacy_policy' => '<flux:link href="'.route('policy.show').'" target="_blank">'.__('Privacy Policy').'</flux:link>',
-                            ]) !!}
-                        </flux:checkbox.label>
-                    </flux:checkbox>
+                    <div class="flex items-start gap-2">
+                        <flux:checkbox name="terms" required />
+                        <flux:text>
+                            {{ __('I agree to the') }}
+                            <flux:link href="{{ route('terms.show') }}" target="_blank">{{ __('Terms of Service') }}</flux:link>
+                            {{ __('and') }}
+                            <flux:link href="{{ route('policy.show') }}" target="_blank">{{ __('Privacy Policy') }}</flux:link>
+                        </flux:text>
+                    </div>
                 @endif
 
                 <div class="flex items-center justify-between">
