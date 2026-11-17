@@ -47,7 +47,8 @@
 }
 
 /* ── Collapsed state: square items ─────────────────────────────────── */
-[data-flux-sidebar-collapsed-desktop].fj-sidebar-dark [data-flux-sidebar-item] {
+/* Items in a collapsed group's flyout menu keep their normal row shape. */
+[data-flux-sidebar-collapsed-desktop].fj-sidebar-dark [data-flux-sidebar-item]:not([data-flux-menu] *) {
     height: auto;
     aspect-ratio: 1 / 1;
     justify-content: center;
