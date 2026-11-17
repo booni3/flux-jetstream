@@ -58,3 +58,31 @@
 [data-flux-sidebar-collapsed-desktop] {
     overflow-x: hidden;
 }
+
+/* ── Collapsed groups: match items and show the current section ───── */
+[data-flux-sidebar].fj-sidebar-dark [data-flux-sidebar-group-dropdown] > button {
+    margin-block: 0;
+    padding-inline: calc(0.625rem - 1px);
+    color: var(--fj-sidebar-item-color, var(--color-gray-400));
+}
+
+[data-flux-sidebar].fj-sidebar-dark [data-flux-sidebar-group-dropdown] > button:hover {
+    color: var(--fj-sidebar-item-hover-color, var(--color-white));
+    background-color: var(--fj-sidebar-item-hover-bg, var(--color-gray-700));
+}
+
+[data-flux-sidebar].fj-sidebar-dark [data-flux-sidebar-group-dropdown]:has([data-flux-sidebar-item][data-current]) > button {
+    color: var(--fj-sidebar-item-active-color, var(--color-white));
+    background-color: var(--fj-sidebar-item-active-bg, var(--color-gray-900));
+}
+
+[data-flux-sidebar].fj-sidebar-dark [data-flux-sidebar-group-dropdown] > button svg {
+    width: var(--fj-sidebar-icon-size, 1.375rem);
+    height: var(--fj-sidebar-icon-size, 1.375rem);
+}
+
+[data-flux-sidebar-collapsed-desktop].fj-sidebar-dark [data-flux-sidebar-group-dropdown] > button {
+    height: auto;
+    aspect-ratio: 1 / 1;
+    justify-content: center;
+}
